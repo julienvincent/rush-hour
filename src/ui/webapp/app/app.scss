@@ -1,0 +1,41 @@
+*, *:before, *:after {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+$red: #E04B4B;
+$darkRed: #ce4444;
+
+body {
+  margin: 0;
+  font-family: 'Lato', sans-serif;
+  background: transparent;
+  height: 100vh;
+}
+
+p, a, text, span {
+  margin: 0;
+  padding: 0;
+  font-family: 'Lato', sans-serif;
+}
+
+.scrollable {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.absolute {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 1px;
+  height: 1px;
+}
+
+@import "containers/Container";

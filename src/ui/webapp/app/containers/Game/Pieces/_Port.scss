@@ -1,0 +1,18 @@
+.port {
+  border: 6px solid #233a4c;
+  background: #8e454f;
+
+  i {
+    font-size: 3vw;
+    color: #582323;
+    text-shadow: 2px 2px 8px #50272d;
+  }
+}
+.inactive-port {
+  border: 6px solid #5A434C;
+  background: #904B4B;
+
+  i {
+    color: rgba(48, 80, 54, 0.8);
+  }
+}

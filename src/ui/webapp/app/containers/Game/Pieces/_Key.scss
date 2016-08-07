@@ -1,0 +1,14 @@
+.key {
+  box-shadow: none;
+
+  i {
+    color: #36c64f;
+    text-shadow: none;
+    font-size: 4vw;
+  }
+}
+.inactive-key {
+  i {
+    color: rgba(255, 255, 255, .35);
+  }
+}
