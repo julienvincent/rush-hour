@@ -4,7 +4,7 @@ if (env.ENVIRONMENT == 'development') {
     require('./app.scss')
 }
 
-import Container from 'app/containers/Container'
+import Index from 'app/containers/Index'
 
 console.debug("JavaScript loaded.")
 
@@ -21,6 +21,6 @@ window.onerror = e => {
  * Wait until all resources have loaded and then render the React app into the #root of the index.html
  */
 window.onload = () => {
-    render(Container(), document.getElementById('root'))
+    render(Index(), document.getElementById('root'))
     console.debug("React rendered.")
 }

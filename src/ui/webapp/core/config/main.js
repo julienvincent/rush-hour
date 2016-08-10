@@ -12,6 +12,7 @@ module.exports = {
      * The server port
      */
     "port": 3000,
+    "run": true,
 
     /**
      * A namespace to be used within the app.

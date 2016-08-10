@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rimraf build",
     "start": "node core/server.js",
-    "bundle": "node core/server.js --bundle",
+    "build": "node core/server.js --bundle",
     "lint": "eslint app; exit 0",
     "lint:verbose": "eslint app"
   },
