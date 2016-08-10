@@ -124,6 +124,19 @@ public class Board {
         return board[position[0]][position[1]] == null;
     }
 
+    public boolean checkIfValidDirections(String[] directions) {
+        boolean valid = true;
+        String[] validDirections = {"up", "down", "left", "right"};
+
+        for (String direction : directions) {
+            if (!Arrays.asList(validDirections).contains(direction)) {
+                valid = false;
+            }
+        }
+
+        return valid;
+    }
+
     /**
      * Check if a tuple is null or not. Log a common error if null.
      * @param tuple
@@ -203,7 +216,16 @@ public class Board {
             board[playerPosition[0]][playerPosition[1]] = new Player();
             board[playerPosition[0]][playerPosition[1]].setDimensions(playerDimensions[0], playerDimensions[1]);
             if (lines.length >= 4) {
-                board[playerPosition[0]][playerPosition[1]].setDirections(this.splitLine(lines[3]));
+                String[] playerDirections = this.splitLine(lines[3]);
+                if (playerDirections.length > 0) {
+                    if (this.checkIfValidDirections(playerDirections)) {
+                        board[playerPosition[0]][playerPosition[1]].setDirections(this.splitLine(lines[3]));
+                    } else {
+                        console.error("Invalid set of directions given. Valid directions are <green>[up down left right]");
+                        this.boardIsInvalid();
+                        return;
+                    }
+                }
             }
 
             /**
@@ -247,7 +269,13 @@ public class Board {
                             break;
                         }
                     } else {
-                        board[position[0]][position[1]].setDirections(splitLine);
+                        if (this.checkIfValidDirections(splitLine)) {
+                            board[position[0]][position[1]].setDirections(splitLine);
+                        } else {
+                            console.error("Invalid set of directions given. Valid directions are <green>[up down left right]");
+                            this.boardIsInvalid();
+                            break;
+                        }
                         position = null;
                         dimensions = null;
                     }
