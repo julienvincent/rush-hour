@@ -4,6 +4,7 @@ import utils.Reader;
 import utils.console;
 
 import java.util.Arrays;
+import java.util.StringJoiner;
 
 public class Board {
     private Piece[][] board;
@@ -31,17 +32,21 @@ public class Board {
      * @param direction
      */
     private int[] getNextPosition(int[] currentPosition, String direction) {
-        int[] nextPosition = currentPosition;
+        int[] nextPosition = currentPosition.clone();
 
         switch (direction) {
             case "up":
-                nextPosition[0] = currentPosition[0] - 1;
+                nextPosition[1] = nextPosition[1] - 1;
+                break;
             case "down":
-                nextPosition[0] = currentPosition[0] + 1;
+                nextPosition[1] = nextPosition[1] + 1;
+                break;
             case "left":
-                nextPosition[1] = currentPosition[1] - 1;
+                nextPosition[0] = nextPosition[0] - 1;
+                break;
             case "right":
-                nextPosition[1] = currentPosition[1] + 1;
+                nextPosition[0] = nextPosition[0] + 1;
+                break;
         }
 
         return nextPosition;
@@ -56,24 +61,36 @@ public class Board {
      * @param direction
      */
     public boolean move(int[] target, String direction) {
-        Piece piece = board[target[0]][target[1]];
+        target[1] = this.swapCoordinateDirection(target[1]);
+        Piece piece = board[target[1]][target[0]];
+
+        console.debug("Attempting to move piece at location <green>[" +
+                target[1] + " " + target[0] + "]<blue> in direction <green>" + direction);
 
         if (piece != null) {
+            console.debug("Piece at given location found.");
             if (piece.hasDirection(direction)) {
                 int[] location = this.getNextPosition(target, direction);
                 int[] pieceDimensions = {piece.getWidth(), piece.getHeight()};
-                if (this.checkIfValidPosition(location) && this.checkIfOverlap(location, pieceDimensions)) {
-                    board[location[0]][location[1]] = piece;
-                    board[target[0]][target[1]] = null;
+                console.debug("Attempting to move piece to location <green>[" + location[1] + " " + location[0] + "]");
+                if (this.checkIfValidPosition(location) && this.checkIfOverlap(location, pieceDimensions, board[target[1]][target[0]].getId())) {
+                    board[location[1]][location[0]] = piece;
+                    board[target[1]][target[0]] = null;
+
+                    console.log("<b><green>Successfully moved piece");
+                    this.printBoard();
 
                     return true;
                 } else {
+                    console.debug("Piece can't be moved to the given location");
                     return false;
                 }
             } else {
+                console.debug("Piece cannot be moved in the given direction");
                 return false;
             }
         } else {
+            console.debug("No piece found");
             return false;
         }
     }
@@ -90,7 +107,7 @@ public class Board {
             int i = 0;
             for (Piece piece : row) {
                 if (piece != null && piece instanceof Player) {
-                    if (piece.getWidth() - 1 + i >= y) {
+                    if (piece.getWidth() + i >= y) {
                         gameComplete = true;
                     }
                 }
@@ -105,19 +122,46 @@ public class Board {
      * Reformat the current board layout as a 2D array of strings.
      * This is used to pass values that the JavaScript UI can understand
      */
-    public String[][] formatAsString() {
-        String[][] stringBoard = new String[x][y];
+    public String formatAsString() {
+        String stringBoard = "";
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 Piece piece = board[i][j];
+
                 if (piece != null) {
-                    stringBoard[i][j] = piece.getWidth() + ":" + piece.getHeight();
+                    stringBoard += piece.getId() + "=" + piece.getWidth() + ":" + piece.getHeight() + (piece instanceof Player ? ":p" : "");
+                } else {
+                    stringBoard += "n";
                 }
+                if (j != board[i].length - 1) {
+                    stringBoard += "-";
+                }
+            }
+
+            if (i != board.length - 1) {
+                stringBoard += "|";
             }
         }
 
         return stringBoard;
+    }
+
+    public int getX() {
+        return x;
+    }
+    public int getY() {
+        return y;
+    }
+
+    private void printBoard() {
+        for (Piece[] row : board) {
+            String grouped = "";
+            for (Piece piece : row) {
+                grouped += piece == null ? " - " : "<green>" + piece.getWidth() + ":" + piece.getHeight() + "<b><blue> ";
+            }
+            console.debug(grouped);
+        }
     }
 
     /**
@@ -157,10 +201,10 @@ public class Board {
      * @param position
      * @param dimensions
      */
-    private boolean checkIfOverlap(int[] position, int[] dimensions) {
+    private boolean checkIfOverlap(int[] position, int[] dimensions, String id) {
         boolean valid = true;
 
-        if (position[0] + dimensions[1] - 1 > x || position[1] + dimensions[0] - 1 > y) {
+        if (position[0] + dimensions[0] - 1 >= y || position[1] - dimensions[1] + 1 < 0) {
             valid = false;
         }
 
@@ -175,7 +219,7 @@ public class Board {
                  * to the board due to the fact that the new piece's dimensions
                  * are currently unset and so do not trigger the overlap algorithm.
                  */
-                if (piece != null) {
+                if (piece != null && piece.getId() != id) {
                     int height = piece.getHeight();
                     int width = piece.getWidth();
 
@@ -190,20 +234,20 @@ public class Board {
                      * Check if dimension(W) overlaps
                      */
                     boolean HOverlap = false;
-                    if (i < position[0]) {
-                        if ((position[0] - i) + ((dimensions[1] - 1) * -1) <= 0) {
+                    if (i < position[1]) {
+                        if ((position[1] - i) + ((dimensions[1] - 1) * -1) <= 0) {
                             HOverlap = true;
                         }
-                    } else if ((i - position[0]) + ((height - 1) * -1) <= 0) {
+                    } else if ((i - position[1]) + ((height - 1) * -1) <= 0) {
                         HOverlap = true;
                     }
 
                     if (HOverlap) {
-                        if (j < position[1]) {
-                            if (position[1] - j <= width - 1) {
+                        if (j < position[0]) {
+                            if (position[0] - j <= width - 1) {
                                 valid = false;
                             }
-                        } else if (j - position[1] <= dimensions[0] - 1) {
+                        } else if (j - position[0] <= dimensions[0] - 1) {
                             valid = false;
                         }
                     }
@@ -220,13 +264,13 @@ public class Board {
      * @param position
      */
     private boolean checkIfValidPosition(int[] position) {
-        if (position[0] < 0 || position[1] < 0) {
+        if (position[1] < 0 || position[0] < 0) {
             return false;
         }
-        if (position[0] > x - 1 || position[1] > y - 1) {
+        if (position[1] > x - 1 || position[0] > y - 1) {
             return false;
         }
-        return board[position[0]][position[1]] == null;
+        return board[position[1]][position[0]] == null;
     }
 
     /**
@@ -285,7 +329,7 @@ public class Board {
      * @param fake
      */
     private int swapCoordinateDirection(int fake) {
-        return y - fake;
+        return x - fake - 1;
     }
 
     /**
@@ -312,7 +356,7 @@ public class Board {
             }
             this.x = boardDimensions[0];
             this.y = boardDimensions[1];
-            board = new Piece[boardDimensions[0]][boardDimensions[1]];
+            board = new Piece[x][y];
 
             console.debug("Board dimensions: <green>[" + x + " " + y + "]");
 
@@ -324,15 +368,15 @@ public class Board {
                 this.boardIsInvalid();
                 return;
             }
-            playerPosition[0] = this.swapCoordinateDirection(playerPosition[0]);
+            playerPosition[1] = this.swapCoordinateDirection(playerPosition[1]);
             if (!this.checkIfValidPosition(playerPosition)) {
                 this.boardIsInvalid();
-                console.error("Invalid player position");
+                console.error("Invalid player position: <green>[" + playerPosition[0] + " " + playerPosition[1] + "]");
                 return;
             }
             console.debug("Player position: <green>[" + playerPosition[0] + " " + playerPosition[1] + "]");
             int[] playerDimensions = this.getTuples(lines[2]);
-            if (!this.checkIfOverlap(playerPosition, playerDimensions)) {
+            if (!this.checkIfOverlap(playerPosition, playerDimensions, null)) {
                 this.boardIsInvalid();
                 console.error("Invalid player dimensions");
                 return;
@@ -343,15 +387,16 @@ public class Board {
                 return;
             }
 
-            board[playerPosition[0]][playerPosition[1]] = new Player();
-            board[playerPosition[0]][playerPosition[1]].setDimensions(playerDimensions[0], playerDimensions[1]);
+            board[playerPosition[1]][playerPosition[0]] = new Player();
+            board[playerPosition[1]][playerPosition[0]].setId(playerPosition[1] + " " + playerPosition[0]);
+            board[playerPosition[1]][playerPosition[0]].setDimensions(playerDimensions[0], playerDimensions[1]);
             if (lines.length >= 4) {
                 String[] playerDirections = this.splitLine(lines[3]);
                 if (playerDirections.length > 0) {
                     if (this.checkIfValidDirections(playerDirections)) {
-                        board[playerPosition[0]][playerPosition[1]].setDirections(this.splitLine(lines[3]));
+                        board[playerPosition[1]][playerPosition[0]].setDirections(this.splitLine(lines[3]));
                     } else {
-                        console.error("Invalid set of directions given. Valid directions are <green>[up down left right]");
+                        console.error("Invalid set of directions given. Valid directions are <green>[up down left right]. Check line <green>4");
                         this.boardIsInvalid();
                         return;
                     }
@@ -373,16 +418,17 @@ public class Board {
                 if (splitLine.length != 0) {
                     if (position == null) {
                         position = this.getTuples(line);
-                        position[0] = this.swapCoordinateDirection(position[0]);
+                        position[1] = this.swapCoordinateDirection(position[1]);
                         if (this.invalidTuple(position, i + 1, line)) {
                             this.boardIsInvalid();
                             return;
                         }
                         if (this.checkIfValidPosition(position)) {
-                            board[position[0]][position[1]] = new Piece();
+                            board[position[1]][position[0]] = new Piece();
+                            board[position[1]][position[0]].setId(position[1] + " " + position[0]);
                         } else {
                             this.boardIsInvalid();
-                            console.error("A piece already exists at point [" + position[0] + " " + position[1] + "] or the position is not on the board. " +
+                            console.error("A piece already exists at point [" + position[1] + " " + position[0] + "] or the position is not on the board. " +
                                     "Check line <green>" + (i + 1));
                             break;
                         }
@@ -392,8 +438,8 @@ public class Board {
                             this.boardIsInvalid();
                             return;
                         }
-                        if (this.checkIfOverlap(position, dimensions)) {
-                            board[position[0]][position[1]].setDimensions(dimensions[0], dimensions[1]);
+                        if (this.checkIfOverlap(position, dimensions, null)) {
+                            board[position[1]][position[0]].setDimensions(dimensions[0], dimensions[1]);
                         } else {
                             this.boardIsInvalid();
                             console.error("A piece overlaps or extends past the boards boundaries. Check line <green>" + (i + 1));
@@ -401,14 +447,14 @@ public class Board {
                         }
                     } else {
                         if (this.checkIfValidDirections(splitLine)) {
-                            board[position[0]][position[1]].setDirections(splitLine);
+                            board[position[1]][position[0]].setDirections(splitLine);
                         } else {
-                            console.error("Invalid set of directions given. Valid directions are <green>[up down left right]");
-                            this.boardIsInvalid();
-                            break;
+                            console.debug("Ignoring directions that do not match <green>[up down left right]");
                         }
                         position = null;
                         dimensions = null;
+                        this.printBoard();
+                        console.log("");
                     }
                 } else {
                     if ((position != null && dimensions == null) || position == null) {
@@ -419,6 +465,10 @@ public class Board {
                     position = null;
                     dimensions = null;
                 }
+            }
+
+            if (this.boardIsValid()) {
+                this.printBoard();
             }
         } else {
             this.boardIsInvalid();

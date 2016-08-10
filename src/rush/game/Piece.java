@@ -7,6 +7,8 @@ public class Piece {
     private int height;
     private String[] directions = {};
 
+    private String id;
+
     public void setDimensions(int width, int height) {
         this.width = width;
         this.height = height;
@@ -22,6 +24,14 @@ public class Piece {
 
     public int getHeight() {
         return height;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public boolean hasDirection(String direction) {

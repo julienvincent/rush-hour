@@ -61,7 +61,7 @@ function makeIndex() {
 
     injector('head').append(`    <link rel="stylesheet" href="resources/lato.css">\n`)
     injector('head').append(`    <link rel="stylesheet" href="resources/icomoon/style.css">\n`)
-    injector('head').append(`    <link rel="stylesheet" href="resources/cursor.css">\n`)
+    // injector('head').append(`    <link rel="stylesheet" href="resources/cursor.css">\n`)
 
     injector('body').append(`${variables}\n`)
     injector('body').append(`${js}\n`)

@@ -17,7 +17,7 @@ public class console {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
-    public static String level = "ALL";
+    public static String level = "INFO";
 
     /**
      * Set the current log level to record.

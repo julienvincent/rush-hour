@@ -11,6 +11,8 @@ import netscape.javascript.JSObject;
 
 import java.lang.reflect.Field;
 
+import rush.RushHour;
+import rush.game.Board;
 import utils.Args;
 import bridge.Bridge;
 import utils.Reader;
@@ -35,7 +37,7 @@ public class UI extends Application {
         WebView webview = new WebView();
         WebEngine engine = webview.getEngine();
 
-        Bridge bridge = new Bridge(stage);
+        Bridge bridge = new Bridge(stage, RushHour.game);
 
         console.debug("<green>Enabling JavaScript");
         engine.setJavaScriptEnabled(true);
@@ -56,7 +58,6 @@ public class UI extends Application {
 
         stage.setTitle("Traversal");
         stage.setScene(scene);
-        stage.initStyle(StageStyle.TRANSPARENT);
 
         webview.setOnMousePressed(event -> {
             x = (int) event.getX();
