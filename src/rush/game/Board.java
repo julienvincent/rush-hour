@@ -191,11 +191,11 @@ public class Board {
                      */
                     boolean HOverlap = false;
                     if (i < position[0]) {
-                        if (position[0] - i <= height - 1) {
-                            HOverlap = false;
+                        if ((position[0] - i) + ((dimensions[1] - 1) * -1) <= 0) {
+                            HOverlap = true;
                         }
-                    } else if (i - position[0] <= dimensions[1] - 1) {
-                        HOverlap = false;
+                    } else if ((i - position[0]) + ((height - 1) * -1) <= 0) {
+                        HOverlap = true;
                     }
 
                     if (HOverlap) {
@@ -207,8 +207,6 @@ public class Board {
                             valid = false;
                         }
                     }
-                } else {
-                    console.log("null piece");
                 }
             }
         }
@@ -280,6 +278,17 @@ public class Board {
     }
 
     /**
+     * For some obscure reason, the implementation rules we are given
+     * specify that the x coordinate referenced in input and solution
+     * files is the inverse of real location. This function just swaps
+     * the given fake x value to reference a real coordinate.
+     * @param fake
+     */
+    private int swapCoordinateDirection(int fake) {
+        return y - fake;
+    }
+
+    /**
      * Construct the board from a collection of lines
      * that describe all properties of the board to be.
      *
@@ -315,6 +324,7 @@ public class Board {
                 this.boardIsInvalid();
                 return;
             }
+            playerPosition[0] = this.swapCoordinateDirection(playerPosition[0]);
             if (!this.checkIfValidPosition(playerPosition)) {
                 this.boardIsInvalid();
                 console.error("Invalid player position");
@@ -363,6 +373,7 @@ public class Board {
                 if (splitLine.length != 0) {
                     if (position == null) {
                         position = this.getTuples(line);
+                        position[0] = this.swapCoordinateDirection(position[0]);
                         if (this.invalidTuple(position, i + 1, line)) {
                             this.boardIsInvalid();
                             return;
