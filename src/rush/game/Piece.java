@@ -1,5 +1,7 @@
 package rush.game;
 
+import java.util.Arrays;
+
 public class Piece {
     private int width;
     private int height;
@@ -20,5 +22,9 @@ public class Piece {
 
     public int getHeight() {
         return height;
+    }
+
+    public boolean hasDirection(String direction) {
+        return Arrays.asList(this.directions).contains(direction);
     }
 }

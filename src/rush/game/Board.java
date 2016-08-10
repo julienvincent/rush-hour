@@ -23,6 +23,88 @@ public class Board {
         }
     }
 
+    /**
+     * Given a starting position and a direction, determine the
+     * next location from that point.
+     *
+     * @param currentPosition
+     * @param direction
+     */
+    private int[] getNextPosition(int[] currentPosition, String direction) {
+        int[] nextPosition = currentPosition;
+
+        switch (direction) {
+            case "up":
+                nextPosition[0] = currentPosition[0] - 1;
+            case "down":
+                nextPosition[0] = currentPosition[0] + 1;
+            case "left":
+                nextPosition[1] = currentPosition[1] - 1;
+            case "right":
+                nextPosition[1] = currentPosition[1] + 1;
+        }
+
+        return nextPosition;
+    }
+
+    /**
+     * Attempt to move a piece to a new location on the board.
+     * <p>
+     * return true or false for whether or not the move was successful.
+     *
+     * @param target
+     * @param direction
+     */
+    public boolean move(int[] target, String direction) {
+        Piece piece = board[target[0]][target[1]];
+
+        if (piece != null) {
+            if (piece.hasDirection(direction)) {
+                int[] location = this.getNextPosition(target, direction);
+                int[] pieceDimensions = {piece.getWidth(), piece.getHeight()};
+                if (this.checkIfValidPosition(location) && this.checkIfOverlap(location, pieceDimensions)) {
+                    board[location[0]][location[1]] = piece;
+                    board[target[0]][target[1]] = null;
+
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Check if the player is currently touching the right
+     * hand side of the game board. If true, this means that
+     * the game is complete.
+     */
+    public boolean hasTargetBeenReached() {
+        boolean gameComplete = false;
+
+        for (Piece[] row : board) {
+            int i = 0;
+            for (Piece piece : row) {
+                if (piece != null && piece instanceof Player) {
+                    if (piece.getWidth() - 1 + i >= y) {
+                        gameComplete = true;
+                    }
+                }
+                i++;
+            }
+        }
+
+        return gameComplete;
+    }
+
+    /**
+     * Reformat the current board layout as a 2D array of strings.
+     * This is used to pass values that the JavaScript UI can understand
+     */
     public String[][] formatAsString() {
         String[][] stringBoard = new String[x][y];
 
@@ -38,6 +120,13 @@ public class Board {
         return stringBoard;
     }
 
+    /**
+     * Format a given string as a tuple of integers (int[] of length 2).
+     * If the given line cannot be correctly formatted, log an error and
+     * return null.
+     *
+     * @param line
+     */
     private int[] getTuples(String line) {
         String[] splitLine = line.split("\\s+");
         if (splitLine.length != 2) {
@@ -51,10 +140,23 @@ public class Board {
         }
     }
 
+    /**
+     * Split a line into an array of it's separate pieces (delimited by space {" "}).
+     *
+     * @param line
+     */
     private String[] splitLine(String line) {
         return line.split("\\s+");
     }
 
+    /**
+     * Given a piece described as 1) position(tuple) and 2) dimensions(tuple), determine
+     * if the piece is placed in such a way that it is within the board boundaries and
+     * does not overlap with any other existing pieces.
+     *
+     * @param position
+     * @param dimensions
+     */
     private boolean checkIfOverlap(int[] position, int[] dimensions) {
         boolean valid = true;
 
@@ -114,6 +216,11 @@ public class Board {
         return valid;
     }
 
+    /**
+     * Check if a given position is within the board boundaries.
+     *
+     * @param position
+     */
     private boolean checkIfValidPosition(int[] position) {
         if (position[0] < 0 || position[1] < 0) {
             return false;
@@ -124,6 +231,11 @@ public class Board {
         return board[position[0]][position[1]] == null;
     }
 
+    /**
+     * Check if a given set of directions match the ENUM [up, down, left, right]
+     *
+     * @param directions
+     */
     public boolean checkIfValidDirections(String[] directions) {
         boolean valid = true;
         String[] validDirections = {"up", "down", "left", "right"};
@@ -139,6 +251,7 @@ public class Board {
 
     /**
      * Check if a tuple is null or not. Log a common error if null.
+     *
      * @param tuple
      * @param lineNumber
      * @param line
@@ -152,10 +265,16 @@ public class Board {
         return false;
     }
 
+    /**
+     * Set the current board state to INVALID.
+     */
     private void boardIsInvalid() {
         this.validBoard = false;
     }
 
+    /**
+     * Find out if the current board state is valid.
+     */
     public boolean boardIsValid() {
         return this.validBoard;
     }
@@ -163,6 +282,7 @@ public class Board {
     /**
      * Construct the board from a collection of lines
      * that describe all properties of the board to be.
+     *
      * @param lines
      */
     private void constructBoard(String[] lines) {
