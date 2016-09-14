@@ -23,17 +23,26 @@ public class Solver {
 
     public void solve() {
 
+        /**
+         * Add the root node to the que and being
+         * processing it.
+         */
         que.add(new Seed(board, new Action[]{}));
         processQue();
     }
 
     private void processQue() {
+        /**
+         * Get the next node in the que (represented as a seed stack) and
+         * pull the game board from the stack.
+         */
         Seed nextInQue = que.get(0);
         Board boardFromSeed = nextInQue.getBoard();
         Piece[][] boardState = boardFromSeed.getBoard();
 
         /**
-         * Check if the next board in the que is a solution.
+         * Check if the game board is in a solved state and break the
+         * process que if it is.
          */
         if (boardFromSeed.hasTargetBeenReached()) {
             console.log("<green><b>Solution Found");
@@ -42,7 +51,7 @@ public class Solver {
         }
 
         /**
-         * Find all possible moves from this board current state and
+         * Find all possible nodes from the boards current state and
          * add them to the end of the que.
          */
         int i = 0;
@@ -50,22 +59,30 @@ public class Solver {
             int j = 0;
             for (Piece piece : row) {
                 if (piece != null) {
+                    // try all directions on the piece
                     for (String direction : this.directions) {
                         // Can this piece move in a given direction
                         if (piece.hasDirection(direction)) {
+                            // clone the board before making any mutations
                             Board clonedBoard = new Board(boardState);
                             // try move in a direction
                             if (clonedBoard.move(new int[]{j, i}, direction, false)) {
+                                // create a hash from the board state after move
                                 String boardHash = clonedBoard.formatAsString();
 
                                 /**
-                                 * Check if this board configuration has existed previously
-                                 * in this seed. If it has, the seed will die
+                                 * Check if this board configuration has previously existed
+                                 * across any of the nodes. If it has, the seed will die and the next
+                                 * node in the que will be processed
                                  */
                                 if (!hashes.contains(boardHash)) {
                                     hashes.add(boardHash);
+
+                                    // update the seeds board and actions
                                     Seed nextSeed = new Seed(clonedBoard, nextInQue.getActions());
                                     nextSeed.addAction(new Action(i, j, direction, clonedBoard));
+
+                                    // add the seed to the que
                                     que.add(nextSeed);
                                 }
                             }
@@ -77,6 +94,7 @@ public class Solver {
             i++;
         }
 
+        // remove this node from the que and start processing the next node
         que.remove(0);
         processQue();
     }
