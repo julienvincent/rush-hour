@@ -4,7 +4,6 @@ import utils.Reader;
 import utils.console;
 
 import java.util.Arrays;
-import java.util.StringJoiner;
 
 public class Board {
     private Piece[][] board;
@@ -22,6 +21,26 @@ public class Board {
         } else {
             console.error("Board file doesn't exist");
         }
+    }
+
+    public Board(Piece[][] board) {
+        this.x = board.length;
+        this.y = board[0].length;
+        this.board = new Piece[x][y];
+
+        int i = 0;
+        for (Piece[] row : board) {
+            int j = 0;
+            for (Piece piece : row) {
+                this.board[i][j] = board[i][j];
+                j++;
+            }
+            i++;
+        }
+    }
+
+    public Piece[][] getBoard() {
+        return this.board;
     }
 
     /**
@@ -60,8 +79,10 @@ public class Board {
      * @param target
      * @param direction
      */
-    public boolean move(int[] target, String direction) {
-        target[1] = this.swapCoordinateDirection(target[1]);
+    public boolean move(int[] target, String direction, boolean shouldSwap) {
+        if (shouldSwap) {
+            target[1] = this.swapCoordinateDirection(target[1]);
+        }
         Piece piece = board[target[1]][target[0]];
 
         console.debug("Attempting to move piece at location <green>[" +
@@ -77,7 +98,7 @@ public class Board {
                     board[location[1]][location[0]] = piece;
                     board[target[1]][target[0]] = null;
 
-                    console.log("<b><green>Successfully moved piece");
+                    console.debug("<b><green>Successfully moved piece");
                     this.printBoard();
 
                     return true;
@@ -130,7 +151,7 @@ public class Board {
                 Piece piece = board[i][j];
 
                 if (piece != null) {
-                    stringBoard += piece.getId() + "=" + piece.getWidth() + ":" + piece.getHeight() + (piece instanceof Player ? ":p" : "");
+                    stringBoard += piece.getId();
                 } else {
                     stringBoard += "n";
                 }
@@ -161,6 +182,16 @@ public class Board {
                 grouped += piece == null ? " - " : "<green>" + piece.getWidth() + ":" + piece.getHeight() + "<b><blue> ";
             }
             console.debug(grouped);
+        }
+    }
+
+    public void print() {
+        for (Piece[] row : board) {
+            String grouped = "";
+            for (Piece piece : row) {
+                grouped += piece == null ? " - " : "<green>" + piece.getWidth() + ":" + piece.getHeight() + "<b><blue> ";
+            }
+            console.log(grouped);
         }
     }
 

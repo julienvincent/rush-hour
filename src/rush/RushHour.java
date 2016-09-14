@@ -1,7 +1,7 @@
 package rush;
 
 import rush.game.Board;
-import ui.UI;
+import rush.solver.Solver;
 import utils.Reader;
 import utils.console;
 import utils.Args;
@@ -10,32 +10,29 @@ import java.util.Arrays;
 
 public class RushHour {
 
-    static UI ui;
     public static Board game;
 
     public static void main(String raw[]) {
         Args.setup(raw);
 
         if (Args.option("d") != null || Args.option("debug") != null) {
-            console.setLevel("ALL");
+            console.setLevel("INFO");
         }
 
-        if (Args.length < 2) {
-            console.log("<green>Please include a board setup file and a solutions file");
-            return;
-        }
-
-        game = new Board(Args.get()[0]);
-
-        if (game.boardIsValid()) {
-            if (Args.option("no-ui") == null) {
-                ui = new UI();
-                ui.run();
-            }
-
-            trySolution();
+        if (Args.length < 1) {
+            console.log("<green>Please include a board setup file");
         } else {
-            console.error("Board configuration failed. Please provide a valid setup file");
+            game = new Board(Args.get()[0]);
+            if (game.boardIsValid()) {
+                if (Args.length == 1) {
+                    Solver solver = new Solver(game);
+                    solver.solve();
+                } else {
+                    trySolution();
+                }
+            } else {
+                console.error("Board configuration failed. Please provide a valid setup file");
+            }
         }
     }
 
@@ -61,7 +58,7 @@ public class RushHour {
                             console.error("Expected characters [0-9 ]. Line should only contain Numbers ");
                         }
                     } else {
-                        if (game.move(target, line)) {
+                        if (game.move(target, line, true)) {
                             target = null;
                         } else {
                             completed = false;
