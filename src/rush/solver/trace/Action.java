@@ -4,7 +4,7 @@ import rush.game.Board;
 
 public class Action {
     /**
-     * Meta that led to this action
+     * Meta that created the action.
      */
     private int x;
     private int y;

@@ -12,6 +12,10 @@ public class Seed {
         this.actions = previousActions;
     }
 
+    /**
+     * Extend the actions array and add the next action.
+     * @param nextAction
+     */
     public void addAction(Action nextAction) {
         Action[] actions = new Action[this.actions.length + 1];
 

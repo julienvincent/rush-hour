@@ -32,8 +32,18 @@ public class Solver {
     }
 
     private void processQue() {
+
         /**
-         * Get the next node in the que (represented as a seed stack) and
+         * All nodes have been checked without a solution being found.
+         * Stop further processing.
+         */
+        if (que.size() == 0) {
+            console.log("<red>No Solution");
+            return;
+        }
+
+        /**
+         * Get the next node in the que (represented as a seed) and
          * pull the game board from the stack.
          */
         Seed nextInQue = que.get(0);
@@ -42,7 +52,7 @@ public class Solver {
 
         /**
          * Check if the game board is in a solved state and break the
-         * process que if it is.
+         * process que accordingly.
          */
         if (boardFromSeed.hasTargetBeenReached()) {
             console.log("<green><b>Solution Found");
@@ -61,28 +71,20 @@ public class Solver {
                 if (piece != null) {
                     // try all directions on the piece
                     for (String direction : this.directions) {
-                        // Can this piece move in a given direction
                         if (piece.hasDirection(direction)) {
                             // clone the board before making any mutations
                             Board clonedBoard = new Board(boardState);
-                            // try move in a direction
                             if (clonedBoard.move(new int[]{j, i}, direction, false)) {
                                 // create a hash from the board state after move
                                 String boardHash = clonedBoard.formatAsString();
-
-                                /**
-                                 * Check if this board configuration has previously existed
-                                 * across any of the nodes. If it has, the seed will die and the next
-                                 * node in the que will be processed
-                                 */
+                                // only continue if this board configuration is unique
                                 if (!hashes.contains(boardHash)) {
                                     hashes.add(boardHash);
 
-                                    // update the seeds board and actions
+                                    // update the seeds' board and actions and add it to the end of the que
                                     Seed nextSeed = new Seed(clonedBoard, nextInQue.getActions());
                                     nextSeed.addAction(new Action(i, j, direction, clonedBoard));
 
-                                    // add the seed to the que
                                     que.add(nextSeed);
                                 }
                             }
